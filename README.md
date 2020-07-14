@@ -16,5 +16,15 @@ Write a program that when run will parse the `calls.log` file and print out the 
     
 ## Run on Linux
 
+Unpack disco-test-phone-company-1.0.tgz
+
     tar -zxvf target/universal/disco-test-phone-company-1.0.tgz -C /tmp
+
+Run application by script disco-test-phone-company
+
     /tmp/disco-test-phone-company-1.0/bin/disco-test-phone-company
+    
+Application will read calls.log from classpath if no program arguments specified,
+or the first argument will be used as filename.
+
+    /tmp/disco-test-phone-company-1.0/bin/disco-test-phone-company src/main/resources/calls.log
