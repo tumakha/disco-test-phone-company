@@ -4,4 +4,4 @@ lazy val phoneCompany = (project in file(".")).settings(
     version := "1.0",
     scalaVersion := "2.13.3"
   )
-)
+).enablePlugins(JavaAppPackaging)

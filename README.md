@@ -10,3 +10,11 @@ For a customer the cost of a call up to and including 3 minutes in duration is c
 
 Write a program that when run will parse the `calls.log` file and print out the total cost of calls for the day for each customer. You can use any libraries you wish to.
 
+## Build
+
+    sbt universal:packageZipTarball
+    
+## Run on Linux
+
+    tar -zxvf target/universal/disco-test-phone-company-1.0.tgz -C /tmp
+    /tmp/disco-test-phone-company-1.0/bin/disco-test-phone-company
