@@ -26,6 +26,6 @@ object Main extends App {
       CallsParser(lines)
   }
 
-  callsParser.printTotalCost()
+  callsParser.printCostPerCustomer()
 
 }

@@ -3,9 +3,11 @@ package com.phone
 import java.time.LocalTime
 
 import com.phone.CallsParser.CallRecord
+import com.phone.SparkFunctions.callCostUdf
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.types.DataTypes.createDecimalType
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
 import scala.util.Try
 
@@ -49,9 +51,25 @@ object CallsParser extends Logging {
 
 class CallsParser(callRecords: Dataset[CallRecord])(implicit spark: SparkSession) {
 
-  def printTotalCost() {
-    callRecords.printSchema()
-    callRecords.show()
+  import org.apache.spark.sql.expressions.Window
+  import org.apache.spark.sql.functions._
+
+  val callsWithCost: DataFrame = callRecords
+    .withColumn("cost", callCostUdf(col("durationSeconds")))
+    .groupBy("customerId", "phoneNumber")
+    .sum("cost")
+    .withColumnRenamed("sum(cost)", "costPerNumber")
+    .withColumn("maxCost",
+      max("costPerNumber").over(Window.partitionBy("customerId")))
+    .where(col("costPerNumber").lt(col("maxCost")))
+    .groupBy("customerId")
+    .sum("costPerNumber")
+    .select(col("customerId"),
+      col("sum(costPerNumber)").as("totalCost").cast(createDecimalType(8, 2)))
+    .orderBy("customerId")
+
+  def printCostPerCustomer() {
+    callsWithCost.show(1000)
   }
 
 }
