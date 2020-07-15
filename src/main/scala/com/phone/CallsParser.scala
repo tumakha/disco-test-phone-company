@@ -6,8 +6,8 @@ import com.phone.CallsParser.CallRecord
 import com.phone.SparkFunctions.callCostUdf
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.types.DataTypes.createDecimalType
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.apache.spark.sql.expressions.WindowSpec
+import org.apache.spark.sql.{Dataset, SparkSession}
 
 import scala.util.Try
 
@@ -53,20 +53,27 @@ class CallsParser(callRecords: Dataset[CallRecord])(implicit spark: SparkSession
 
   import org.apache.spark.sql.expressions.Window
   import org.apache.spark.sql.functions._
+  import spark.implicits._
 
-  val callsWithCost: DataFrame = callRecords
-    .withColumn("cost", callCostUdf(col("durationSeconds")))
-    .groupBy("customerId", "phoneNumber")
-    .sum("cost")
-    .withColumnRenamed("sum(cost)", "costPerNumber")
-    .withColumn("maxCost",
-      max("costPerNumber").over(Window.partitionBy("customerId")))
-    .where(col("costPerNumber").lt(col("maxCost")))
+  spark.udf.register("callCost", callCostUdf)
+  callRecords.createTempView("calls")
+
+  val windowSpec: WindowSpec = Window.partitionBy("customerId").orderBy(col("costPerNumber").desc)
+
+  private val callsWithCost: Dataset[(String, BigDecimal)] = spark
+    .sql(""" SELECT customerId, phoneNumber,
+        SUM(CAST(callCost(durationSeconds) AS DECIMAL(8,2))) AS costPerNumber
+        FROM calls
+        GROUP BY customerId, phoneNumber """)
+    .withColumn("windowRow", row_number().over(windowSpec))
+    .where(expr("windowRow != 1"))
     .groupBy("customerId")
     .sum("costPerNumber")
-    .select(col("customerId"),
-      col("sum(costPerNumber)").as("totalCost").cast(createDecimalType(8, 2)))
-    .orderBy("customerId")
+    .withColumnRenamed("sum(costPerNumber)", "totalCost")
+    .as[(String, BigDecimal)]
+    .cache()
+
+  lazy val costPerCustomer: Map[String, BigDecimal] = callsWithCost.collect().toMap
 
   def printCostPerCustomer() {
     callsWithCost.show(1000)

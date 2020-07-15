@@ -38,13 +38,9 @@ class CallsParserSpec extends AnyFlatSpec with should.Matchers {
 
   it should "calculate cost per customer" in {
     val callsParser = CallsParser("src/test/resources/test-calls.log")
-
-    val costPerCustomer: Map[String, BigDecimal] = callsParser.callsWithCost.collect()
-      .map(row => row.getString(0) -> BigDecimal(row.getDecimal(1))).toMap
-
     callsParser.printCostPerCustomer()
 
-    costPerCustomer shouldBe Map("A" -> 31.38, "B" -> 30.08, "First Last" -> 9.55)
+    callsParser.costPerCustomer shouldBe Map("A" -> 31.38, "B" -> 30.08, "First Last" -> 9.55)
   }
 
 }
