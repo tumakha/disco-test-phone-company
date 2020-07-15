@@ -4,6 +4,9 @@ import org.apache.spark.sql.SparkSession
 
 import scala.io.Source
 
+/**
+ * @author Yuriy Tumakha
+ */
 object Main extends App {
 
   val defaultCallsLog = "calls.log"
