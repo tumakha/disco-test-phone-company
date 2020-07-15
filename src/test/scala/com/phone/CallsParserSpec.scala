@@ -1,6 +1,7 @@
 package com.phone
 
 import com.phone.CallsParser.CallRecord
+import org.apache.spark.sql.SparkSession
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
@@ -8,6 +9,11 @@ import org.scalatest.matchers._
  * @author Yuriy Tumakha
  */
 class CallsParserSpec extends AnyFlatSpec with should.Matchers {
+
+  implicit val spark: SparkSession = SparkSession.builder
+    .appName("CallsParser Test")
+    .master("local[4]")
+    .getOrCreate()
 
   "CallsParser" should "parseCallRecord" in {
     val lines = Seq("A 555-333-212 00:02:03", "B 777 02:56:32", "CustomerID +447774445555 00:00:45")
@@ -28,6 +34,17 @@ class CallsParserSpec extends AnyFlatSpec with should.Matchers {
     CallsParser.parseCallRecord("A,555-333-212,00:02:03") shouldBe None
     CallsParser.parseCallRecord("Wrong number 00:02:03") shouldBe None
     CallsParser.parseCallRecord("Wrong 555-333-212 000203") shouldBe None
+  }
+
+  it should "calculate cost per customer" in {
+    val callsParser = CallsParser("src/test/resources/test-calls.log")
+
+    val costPerCustomer: Map[String, BigDecimal] = callsParser.callsWithCost.collect()
+      .map(row => row.getString(0) -> BigDecimal(row.getDecimal(1))).toMap
+
+    callsParser.printCostPerCustomer()
+
+    costPerCustomer shouldBe Map("A" -> 31.38, "B" -> 30.08, "First Last" -> 9.55)
   }
 
 }
