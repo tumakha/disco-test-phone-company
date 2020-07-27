@@ -1,4 +1,3 @@
-import sbt.Keys.libraryDependencies
 
 lazy val phoneCompany = (project in file(".")).settings(
   Seq(
