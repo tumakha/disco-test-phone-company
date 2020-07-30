@@ -31,5 +31,3 @@ object CallRecord extends Logging {
 }
 
 case class CallRecord(customerId: String, phoneNumber: Long, durationSeconds: Int)
-
-
