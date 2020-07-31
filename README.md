@@ -1,5 +1,7 @@
 # Phone Company
 
+[![Scala CI](https://github.com/tumakha/disco-test-phone-company/workflows/Scala%20CI/badge.svg)](https://github.com/tumakha/disco-test-phone-company/actions)
+
 Each day at The Phone Company a batch job puts all the customer calls for the previous day into a single log file of:
 
 `'customer id','phone number called','call duration'`
