@@ -51,8 +51,10 @@ class CallsParser(callRecords: Dataset[CallRecord])(implicit spark: SparkSession
 
   lazy val costPerCustomer: Map[String, BigDecimal] = callsWithCost.collect().toMap
 
+  private val printCustomers = 1000
+
   def printCostPerCustomer() {
-    callsWithCost.show(1000)
+    callsWithCost.show(printCustomers)
   }
 
 }
