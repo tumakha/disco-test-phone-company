@@ -12,3 +12,11 @@ lazy val phoneCompany = (project in file(".")).settings(
     )
   )
 ).enablePlugins(JavaAppPackaging)
+
+lazy val checkScalaStyle = taskKey[Unit]("checkScalaStyle")
+checkScalaStyle := scalastyle.in(Test).dependsOn(scalastyle.in(Compile).toTask("")).toTask("").value
+
+(test in Test) := ((test in Test) dependsOn checkScalaStyle).value
+
+scalastyleFailOnWarning := true
+scalastyleFailOnError := true

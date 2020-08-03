@@ -6,6 +6,7 @@ import org.scalatest.matchers.should
 /**
  * @author Yuriy Tumakha
  */
+// scalastyle:off
 class CallRecordSpec extends AnyFlatSpec with should.Matchers {
 
   "CallsParser" should "parseCallRecord" in {

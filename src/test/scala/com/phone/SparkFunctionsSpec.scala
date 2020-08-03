@@ -7,6 +7,7 @@ import org.scalatest.matchers._
 /**
  * @author Yuriy Tumakha
  */
+// scalastyle:off
 class SparkFunctionsSpec extends AnyFlatSpec with should.Matchers {
 
   "callCost" should "work" in {
